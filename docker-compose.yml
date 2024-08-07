@@ -27,6 +27,8 @@ services:
             - meilisearch
             - mailpit
             - selenium
+        command: |
+            sh -c "cron && php artisan schedule:work"
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:
