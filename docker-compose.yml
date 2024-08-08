@@ -27,8 +27,36 @@ services:
             - meilisearch
             - mailpit
             - selenium
-        command: |
-            sh -c "cron && php artisan schedule:work"
+    # Scheduler Service
+    laravel-queue-worker:
+        image: sail-8.3/app
+        container_name: laravel-queue-worker
+        tty: true
+        # environment:
+        working_dir: /var/www
+        volumes:
+            - '.:/var/www/html'
+        # - ./:/var/www
+        # - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+        networks:
+            - sail
+        command: php artisan queue:work --queue=default --sleep=3 --tries=3 --max-time=3600
+        restart: always
+
+    laravel-scheduler-worker:
+        image: sail-8.3/app
+        container_name: laravel-scheduler-worker
+        tty: true
+        working_dir: /var/www
+        volumes:
+            - '.:/var/www/html'
+        # - ./:/var/www
+        # - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+        networks:
+            - sail
+        command: php artisan schedule:run
+        restart: always
+
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:

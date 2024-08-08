@@ -41,13 +41,18 @@ class UpdateCurrencyData extends Command
     {
         $response = Http::get('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
         $data = $response->json();
-
-        // Simpan data ke database
-        // Misalnya, Anda sudah memiliki model Currency
-        CurrencyRate::updateOrCreate(
-            ['date' => $data['date']],
-            ['data' => json_encode($data['usd'])]
-        );
+        $date = $data['date'];
+        collect($data['usd'])->map(function($key, $value) use (&$date) {
+            CurrencyRate::updateOrCreate(
+                [
+                    'currency_code' => $value
+                ],
+                [
+                    'date' => $date,
+                    'rate' => $key
+                ],
+            );
+        });
 
         $this->info('Currency data updated successfully.');
 
